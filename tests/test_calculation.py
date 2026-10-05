@@ -30,6 +30,13 @@ def test_division_by_zero():
     with pytest.raises(OperationError, match="Division by zero is not allowed"):
         Calculation(operation="Division", operand1=Decimal("8"), operand2=Decimal("0"))
 
+def test_calculation_wraps_arithmetic_errors():
+    with pytest.raises(OperationError, match="Calculation failed:"):
+        Calculation(
+            operation="Addition",
+            operand1=Decimal("Infinity"),
+            operand2=Decimal("-Infinity"),
+        )
 
 def test_power():
     calc = Calculation(operation="Power", operand1=Decimal("2"), operand2=Decimal("3"))
@@ -107,6 +114,40 @@ def test_equality():
     calc3 = Calculation(operation="Subtraction", operand1=Decimal("5"), operand2=Decimal("3"))
     assert calc1 == calc2
     assert calc1 != calc3
+
+def test_string_representation():
+    timestamp = datetime(2024, 1, 2, 3, 4, 5)
+    calc = Calculation(
+        operation="Addition",
+        operand1=Decimal("2"),
+        operand2=Decimal("3"),
+        timestamp=timestamp,
+    )
+
+    assert str(calc) == "Addition(2, 3) = 5"
+
+def test_repr_includes_all_calculation_fields():
+    timestamp = datetime(2024, 1, 2, 3, 4, 5)
+    calc = Calculation(
+        operation="Addition",
+        operand1=Decimal("2"),
+        operand2=Decimal("3"),
+        timestamp=timestamp,
+    )
+
+    assert repr(calc) == (
+        "Calculation(operation='Addition', operand1=2, operand2=3, "
+        "result=5, timestamp='2024-01-02T03:04:05')"
+    )
+
+def test_equality_returns_not_implemented_for_other_types():
+    calc = Calculation(
+        operation="Addition",
+        operand1=Decimal("2"),
+        operand2=Decimal("3"),
+    )
+
+    assert calc.__eq__(object()) is NotImplemented
 
 
 # New Test to Cover Logging Warning
